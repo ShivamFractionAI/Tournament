@@ -355,7 +355,7 @@ function getPayloadConfigFromPayload(
 }
 
 // Create and export BarChart component based on recharts
-export const BarChart = React.forwardRef<
+const BarChart = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
     data: any[]
@@ -416,15 +416,16 @@ export const BarChart = React.forwardRef<
             strokeDasharray="4 4"
           />
           <RechartsPrimitive.Tooltip
-            content={(props) => (
-              <ChartTooltipContent
+            content={(props) => {
+              // @ts-ignore - this is a workaround for the type error
+              return <ChartTooltipContent
                 {...props}
                 formatter={(value, name) => [
                   valueFormatter(Number(value)),
                   name,
                 ]}
               />
-            )}
+            }}
           />
           {categories.map((category, i) => (
             <RechartsPrimitive.Bar
@@ -448,4 +449,5 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  BarChart
 }

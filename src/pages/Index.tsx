@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import { Trophy, CalendarDays, Users } from "lucide-react";
+import GameCategories from "@/components/tournaments/GameCategories";
 
 const Index = () => {
   return (
@@ -63,6 +63,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+        
+        {/* Game Categories Section */}
+        <GameCategories />
         
         {/* Features Section */}
         <section className="py-16 px-6 bg-gradient-to-b from-gaming-primary/10 to-transparent">

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Trophy, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface TournamentCardProps {
   id: string;
@@ -15,7 +16,14 @@ interface TournamentCardProps {
   currentRound: number;
   totalRounds: number;
   startDate: string;
-  prize: string;
+  prize: {
+    guaranteed: string;
+    maximum?: string;
+  };
+  entryFee: string;
+  firstPrize: string;
+  winnersPercentage: string;
+  maxEntries: number;
 }
 
 const TournamentCard = ({
@@ -27,6 +35,10 @@ const TournamentCard = ({
   totalRounds,
   startDate,
   prize,
+  entryFee,
+  firstPrize,
+  winnersPercentage,
+  maxEntries,
 }: TournamentCardProps) => {
   
   const statusColor = {
@@ -41,60 +53,112 @@ const TournamentCard = ({
     completed: "Completed",
   };
   
-  const progressValue = (currentRound / totalRounds) * 100;
+  const progressValue = (participants.current / participants.total) * 100;
+  const spotsLeft = participants.total - participants.current;
   
   return (
-    <div className="gaming-card p-6 flex flex-col h-full">
-      <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xl font-bold">{title}</h3>
-        <span className={`text-sm font-medium px-2 py-1 rounded ${statusColor[status]}`}>
+    <div className="gaming-card overflow-hidden">
+      <div className="bg-gaming-primary/10 px-6 py-3 flex items-center justify-between">
+        <h3 className="text-lg font-bold">{title}</h3>
+        <span className={`text-sm font-medium ${statusColor[status]}`}>
           {statusText[status]}
         </span>
       </div>
       
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-        <Users size={16} />
-        <span>
-          {participants.current}/{participants.total} Players
-        </span>
-      </div>
-      
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-        <Trophy size={16} />
-        <span>Prize: {prize}</span>
-      </div>
-      
-      <div className="mb-4">
-        <div className="flex justify-between text-xs mb-1">
-          <span>Round {currentRound}/{totalRounds}</span>
-          <span>{progressValue.toFixed(0)}% Complete</span>
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <div className="mb-1 text-sm text-muted-foreground">Guaranteed Prize Pool</div>
+            <div className="text-2xl font-bold">{prize.guaranteed}</div>
+            {prize.maximum && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="text-xs text-gaming-primary underline mt-1">
+                    Max {prize.maximum}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0">
+                  <div className="p-4 border-b border-border">
+                    <h4 className="font-semibold mb-1">Prize Pool Details</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Prize pool increases as more players join the tournament
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span>Guaranteed Prize</span>
+                      <span>{prize.guaranteed}</span>
+                    </div>
+                    <div className="flex justify-between mb-2 text-sm font-semibold">
+                      <span>Maximum Prize</span>
+                      <span>{prize.maximum}</span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full mt-2 border-gaming-primary/30 text-gaming-primary"
+                    >
+                      Check Winning Breakup
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
+          
+          <div className="text-right">
+            <div className="mb-1 text-sm text-muted-foreground">Entry Fee</div>
+            <div className="text-lg font-bold">{entryFee}</div>
+          </div>
         </div>
-        <Progress value={progressValue} className="h-1 bg-muted" />
-      </div>
-      
-      <div className="text-sm text-muted-foreground mb-6">
-        {status === "upcoming" ? (
-          <span>Starting: {startDate}</span>
-        ) : status === "ongoing" ? (
-          <span>Round {currentRound} in progress</span>
-        ) : (
-          <span>Tournament ended</span>
-        )}
-      </div>
-      
-      <div className="mt-auto">
-        <Link to={`/tournaments/${id}`}>
-          <Button 
-            className="w-full bg-gaming-primary hover:bg-gaming-secondary"
-            disabled={status === "completed"}
-          >
-            {status === "upcoming" && participants.current < participants.total
-              ? "Register"
-              : status === "ongoing"
-              ? "View Matches"
-              : "View Results"}
-          </Button>
-        </Link>
+        
+        <div className="bg-gaming-primary/5 rounded-lg p-3 mb-6">
+          <div className="flex justify-between items-center mb-1 text-sm">
+            <span>{participants.current} spots filled</span>
+            <span>{spotsLeft} spots left</span>
+          </div>
+          <Progress value={progressValue} className="h-1.5 bg-muted" />
+        </div>
+        
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="text-center">
+            <div className="text-xs text-muted-foreground mb-1">First Prize</div>
+            <div className="font-bold">{firstPrize}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-muted-foreground mb-1">Winners</div>
+            <div className="font-bold">{winnersPercentage}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-muted-foreground mb-1">Max Entries</div>
+            <div className="font-bold">{maxEntries}</div>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="text-sm">
+            {status === "upcoming" ? (
+              <span>Starting: {startDate}</span>
+            ) : status === "ongoing" ? (
+              <span>Round {currentRound} of {totalRounds}</span>
+            ) : (
+              <span>Tournament ended</span>
+            )}
+          </div>
+          
+          <Link to={`/tournaments/${id}`}>
+            <Button 
+              className="bg-gaming-primary hover:bg-gaming-secondary"
+              disabled={status === "completed"}
+            >
+              {status === "upcoming" 
+                ? "Join Now"
+                : status === "ongoing"
+                ? "View Details"
+                : "View Results"}
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
