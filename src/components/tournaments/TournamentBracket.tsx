@@ -77,8 +77,10 @@ const TournamentBracket = ({ rounds }: TournamentBracketProps) => {
           const midX = sourceX + (targetX - sourceX) / 2;
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           
-          const winner = match.winner === 1 ? sourceRect.top + sourceRect.height / 4 - bracketRect.top : 
-                                            sourceRect.top + 3 * sourceRect.height / 4 - bracketRect.top;
+          // Determine the Y position based on winner
+          const winner = match.winner === 1 ? 
+                        sourceRect.top + sourceRect.height / 4 - bracketRect.top : 
+                        sourceRect.top + 3 * sourceRect.height / 4 - bracketRect.top;
           
           // Draw a curved path with control points
           path.setAttribute(

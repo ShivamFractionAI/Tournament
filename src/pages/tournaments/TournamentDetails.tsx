@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,9 @@ import TournamentStandings from "@/components/tournaments/TournamentStandings";
 import TournamentBracket from "@/components/tournaments/TournamentBracket";
 import RegistrationForm from "@/components/tournaments/RegistrationForm";
 import { Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 // Mock tournament data
 const tournamentData = {
@@ -28,6 +30,15 @@ const tournamentData = {
 
 // Mock players data by round
 const roundsPlayersData = {
+  "all": Array.from({ length: 30 }, (_, i) => ({
+    id: `player-${i + 1}`,
+    rank: i + 1,
+    name: `Player ${i + 1}`,
+    wins: Math.floor(Math.random() * 10),
+    losses: Math.floor(Math.random() * 5),
+    balance: Math.floor(Math.random() * 300) + 50,
+    status: Math.random() > 0.2 ? "Active" : "Eliminated",
+  })).sort((a, b) => (b.wins * 10 + b.balance) - (a.wins * 10 + a.balance)),
   "winner": [
     {
       id: "player-1",
@@ -165,6 +176,7 @@ const bracketData = [
 ];
 
 const roundOptions = [
+  { label: "All Participants", value: "all" },
   { label: "Winner", value: "winner" },
   { label: "Finalists", value: "finalists" },
   { label: "Semi-Finalists", value: "semi-finalists" },
@@ -179,7 +191,10 @@ const TournamentDetails = () => {
   
   const [searchStandings, setSearchStandings] = useState("");
   const [searchBracket, setSearchBracket] = useState("");
-  const [selectedRound, setSelectedRound] = useState("winner");
+  const [selectedRound, setSelectedRound] = useState("all");
+  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
+  const [agentName, setAgentName] = useState("");
+  const [prompt, setPrompt] = useState("");
   
   const filteredStandingsPlayers = roundsPlayersData[selectedRound as keyof typeof roundsPlayersData]
     .filter(player => player.name.toLowerCase().includes(searchStandings.toLowerCase()));
@@ -191,6 +206,15 @@ const TournamentDetails = () => {
       match.player2.name.toLowerCase().includes(searchBracket.toLowerCase())
     )
   })).filter(round => round.matches.length > 0);
+  
+  const handleJoinTournament = () => {
+    // In a real app, this would submit the form data to a backend
+    console.log("Joining tournament with:", { agentName, prompt });
+    setIsJoinDialogOpen(false);
+    // Reset form
+    setAgentName("");
+    setPrompt("");
+  };
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -285,12 +309,44 @@ const TournamentDetails = () => {
                 </div>
                 
                 <div className="md:col-span-1">
-                  <RegistrationForm
-                    tournamentId={tournamentData.id}
-                    tournamentTitle={tournamentData.title}
-                    spotsLeft={spotsLeft}
-                    startDate={tournamentData.startDate}
-                  />
+                  <div className="gaming-card border-gaming-primary/30 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h2 className="text-xl font-bold">Registration</h2>
+                        <p className="text-muted-foreground text-sm">Secure your spot in the tournament</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Entry Fee</span>
+                        <span className="font-semibold">$5.00</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Starting Balance</span>
+                        <span className="font-semibold">$100.00</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Spots Remaining</span>
+                        <span className="text-gaming-primary font-medium">{spotsLeft} of {tournamentData.participants.total}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Tournament Starts</span>
+                        <span className="text-muted-foreground">{tournamentData.startDate}</span>
+                      </div>
+                      
+                      <Button 
+                        className="w-full bg-gaming-primary hover:bg-gaming-secondary mt-4"
+                        disabled={spotsLeft === 0}
+                        onClick={() => setIsJoinDialogOpen(true)}
+                      >
+                        {spotsLeft === 0 ? "Tournament Full" : `Join for $5.00`}
+                      </Button>
+                    </div>
+                  </div>
                   
                   <div className="gaming-card p-6 mt-8">
                     <h2 className="text-xl font-bold mb-4">Tournament Schedule</h2>
@@ -377,6 +433,51 @@ const TournamentDetails = () => {
           </div>
         </Tabs>
       </div>
+      
+      {/* Join Tournament Dialog */}
+      <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-gaming-dark border-gaming-primary/30">
+          <DialogHeader>
+            <DialogTitle>Join Tournament</DialogTitle>
+            <DialogDescription>
+              Enter your agent details to participate in the {tournamentData.title}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="agentName">Agent Name</Label>
+              <Input 
+                id="agentName" 
+                value={agentName}
+                onChange={(e) => setAgentName(e.target.value)}
+                placeholder="Enter your agent name"
+                className="bg-gaming-dark/60 border-gaming-primary/30"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="prompt">Prompt for Tournament</Label>
+              <Input 
+                id="prompt" 
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Enter your strategy prompt"
+                className="bg-gaming-dark/60 border-gaming-primary/30"
+              />
+            </div>
+            
+            <div className="pt-4">
+              <Button 
+                className="w-full bg-gaming-primary hover:bg-gaming-secondary"
+                onClick={handleJoinTournament}
+              >
+                Join Tournament
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
