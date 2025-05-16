@@ -426,6 +426,32 @@ const TournamentDetails = () => {
               <TournamentStandings
                 players={filteredStandingsPlayers}
                 roundNumber={tournamentData.currentRound}
+                filterControls={
+                  <div className="flex gap-4 items-center ml-auto">
+                    <Select value={selectedRound} onValueChange={setSelectedRound}>
+                      <SelectTrigger className="w-[200px] bg-gaming-dark border-gaming-primary/30">
+                        <SelectValue placeholder="Select Round" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gaming-dark border-gaming-primary/30">
+                        {roundOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                      <Input
+                        placeholder="Search players..."
+                        value={searchStandings}
+                        onChange={(e) => setSearchStandings(e.target.value)}
+                        className="pl-10 bg-gaming-dark border-gaming-primary/30"
+                      />
+                    </div>
+                  </div>
+                }
               />
             </TabsContent>
             
@@ -442,7 +468,22 @@ const TournamentDetails = () => {
                 </div>
               </div>
               
-              <TournamentBracket rounds={filteredBracketData} />
+              <TournamentBracket 
+                rounds={filteredBracketData} 
+                searchControls={
+                  <div className="ml-auto">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                      <Input
+                        placeholder="Search players..."
+                        value={searchBracket}
+                        onChange={(e) => setSearchBracket(e.target.value)}
+                        className="pl-10 bg-gaming-dark border-gaming-primary/30"
+                      />
+                    </div>
+                  </div>
+                }
+              />
             </TabsContent>
             
             <TabsContent value="winnings">

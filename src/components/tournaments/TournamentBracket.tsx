@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, ReactNode } from "react";
 
 interface MatchProps {
   id: string;
@@ -32,9 +32,10 @@ interface RoundProps {
 
 interface TournamentBracketProps {
   rounds: RoundProps[];
+  searchControls?: ReactNode;
 }
 
-const TournamentBracket = ({ rounds }: TournamentBracketProps) => {
+const TournamentBracket = ({ rounds, searchControls }: TournamentBracketProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const bracketRef = useRef<HTMLDivElement>(null);
 
@@ -101,11 +102,14 @@ const TournamentBracket = ({ rounds }: TournamentBracketProps) => {
 
   return (
     <Card className="gaming-card overflow-hidden relative">
-      <CardHeader>
-        <CardTitle>Tournament Bracket</CardTitle>
-        <CardDescription>
-          Follow the bracket to see how the tournament progresses
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Tournament Bracket</CardTitle>
+          <CardDescription>
+            Follow the bracket to see how the tournament progresses
+          </CardDescription>
+        </div>
+        {searchControls}
       </CardHeader>
       <CardContent className="relative">
         <ScrollArea className="h-[500px] w-full pr-4">

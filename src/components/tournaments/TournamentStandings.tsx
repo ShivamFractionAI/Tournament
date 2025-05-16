@@ -1,6 +1,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trophy, Award } from "lucide-react";
+import { ReactNode } from "react";
 
 interface Player {
   id: string;
@@ -15,16 +16,15 @@ interface Player {
 interface TournamentStandingsProps {
   players: Player[];
   roundNumber: number;
+  filterControls?: ReactNode;
 }
 
-const TournamentStandings = ({ players, roundNumber }: TournamentStandingsProps) => {
+const TournamentStandings = ({ players, roundNumber, filterControls }: TournamentStandingsProps) => {
   return (
     <div className="gaming-card p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold">Tournament Standings</h3>
-        <div className="bg-gaming-primary/20 px-3 py-1 rounded-full text-sm">
-          Round {roundNumber}
-        </div>
+        {filterControls}
       </div>
       
       <div className="overflow-x-auto">
