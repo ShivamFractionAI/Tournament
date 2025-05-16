@@ -1,12 +1,14 @@
 
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TournamentHero from "@/components/tournaments/TournamentHero";
 import TournamentStandings from "@/components/tournaments/TournamentStandings";
-import MatchesSchedule from "@/components/tournaments/MatchesSchedule";
-import RoundStatistics from "@/components/tournaments/RoundStatistics";
 import TournamentBracket from "@/components/tournaments/TournamentBracket";
 import RegistrationForm from "@/components/tournaments/RegistrationForm";
+import { Search } from "lucide-react";
 
 // Mock tournament data
 const tournamentData = {
@@ -24,52 +26,78 @@ const tournamentData = {
   prize: "$10,000",
 };
 
-// Mock players data
-const playersData = Array.from({ length: 20 }, (_, i) => ({
-  id: `player-${i + 1}`,
-  rank: i + 1,
-  name: `Player ${i + 1}`,
-  wins: Math.floor(Math.random() * 5),
-  losses: Math.floor(Math.random() * 3),
-  balance: Math.floor(Math.random() * 100) + 50,
-  status: Math.random() > 0.2 ? "Active" : "Eliminated",
-})).sort((a, b) => (b.wins * 10 + b.balance) - (a.wins * 10 + a.balance));
-
-// Mock matches data
-const matchesData = Array.from({ length: 15 }, (_, i) => ({
-  id: `match-${i + 1}`,
-  playerOne: {
-    name: `Player ${i * 2 + 1}`,
+// Mock players data by round
+const roundsPlayersData = {
+  "winner": [
+    {
+      id: "player-1",
+      rank: 1,
+      name: "Player 1",
+      wins: 10,
+      losses: 0,
+      balance: 450,
+      status: "Active",
+    }
+  ],
+  "finalists": [
+    {
+      id: "player-1",
+      rank: 1,
+      name: "Player 1",
+      wins: 10,
+      losses: 0,
+      balance: 450,
+      status: "Active",
+    },
+    {
+      id: "player-2",
+      rank: 2,
+      name: "Player 2",
+      wins: 9,
+      losses: 1,
+      balance: 380,
+      status: "Active",
+    }
+  ],
+  "semi-finalists": Array.from({ length: 4 }, (_, i) => ({
+    id: `player-${i + 1}`,
+    rank: i + 1,
+    name: `Player ${i + 1}`,
+    wins: Math.floor(Math.random() * 5) + 6,
+    losses: Math.floor(Math.random() * 3),
+    balance: Math.floor(Math.random() * 100) + 250,
+    status: "Active",
+  })),
+  "round-3": Array.from({ length: 8 }, (_, i) => ({
+    id: `player-${i + 1}`,
+    rank: i + 1,
+    name: `Player ${i + 1}`,
+    wins: Math.floor(Math.random() * 5) + 4,
+    losses: Math.floor(Math.random() * 3),
+    balance: Math.floor(Math.random() * 100) + 200,
+    status: "Active",
+  })),
+  "round-2": Array.from({ length: 16 }, (_, i) => ({
+    id: `player-${i + 1}`,
+    rank: i + 1,
+    name: `Player ${i + 1}`,
+    wins: Math.floor(Math.random() * 3) + 2,
+    losses: Math.floor(Math.random() * 2),
+    balance: Math.floor(Math.random() * 100) + 150,
+    status: Math.random() > 0.2 ? "Active" : "Eliminated",
+  })),
+  "round-1": Array.from({ length: 20 }, (_, i) => ({
+    id: `player-${i + 1}`,
+    rank: i + 1,
+    name: `Player ${i + 1}`,
+    wins: Math.floor(Math.random() * 5),
+    losses: Math.floor(Math.random() * 3),
     balance: Math.floor(Math.random() * 100) + 50,
-  },
-  playerTwo: {
-    name: `Player ${i * 2 + 2}`,
-    balance: Math.floor(Math.random() * 100) + 50,
-  },
-  time: `${Math.floor(Math.random() * 12 + 1)}:${Math.random() > 0.5 ? '00' : '30'} ${Math.random() > 0.5 ? 'AM' : 'PM'}`,
-  status: i < 5 ? "completed" as const : i < 8 ? "in-progress" as const : "scheduled" as const,
-  result: i < 5 ? {
-    winner: Math.random() > 0.5 ? "playerOne" as const : "playerTwo" as const,
-    winType: ["standard", "economic", "bankruptcy"][Math.floor(Math.random() * 3)] as "standard" | "economic" | "bankruptcy",
-  } : undefined,
-}));
-
-// Mock bid statistics data
-const bidStatisticsData = {
-  averageBid: 23,
-  highestBid: 75,
-  lowestBid: 5,
-  totalBids: 1928,
+    status: Math.random() > 0.2 ? "Active" : "Eliminated",
+  })).sort((a, b) => (b.wins * 10 + b.balance) - (a.wins * 10 + a.balance)),
 };
 
-// Mock position data
-const positionData = {
-  centerMoves: 325,
-  cornerMoves: 487,
-  edgeMoves: 216,
-};
-
-// Mock bracket data
+// Mock bracket data with connections between rounds
 const bracketData = [
   {
     round: 1,
@@ -136,9 +164,33 @@ const bracketData = [
   },
 ];
 
+const roundOptions = [
+  { label: "Winner", value: "winner" },
+  { label: "Finalists", value: "finalists" },
+  { label: "Semi-Finalists", value: "semi-finalists" },
+  { label: "Round 3 Winners", value: "round-3" },
+  { label: "Round 2 Winners", value: "round-2" },
+  { label: "Round 1 Winners", value: "round-1" },
+];
+
 const TournamentDetails = () => {
   const { id } = useParams<{ id: string }>();
   const spotsLeft = tournamentData.participants.total - tournamentData.participants.current;
+  
+  const [searchStandings, setSearchStandings] = useState("");
+  const [searchBracket, setSearchBracket] = useState("");
+  const [selectedRound, setSelectedRound] = useState("winner");
+  
+  const filteredStandingsPlayers = roundsPlayersData[selectedRound as keyof typeof roundsPlayersData]
+    .filter(player => player.name.toLowerCase().includes(searchStandings.toLowerCase()));
+  
+  const filteredBracketData = bracketData.map(round => ({
+    ...round,
+    matches: round.matches.filter(match => 
+      match.player1.name.toLowerCase().includes(searchBracket.toLowerCase()) ||
+      match.player2.name.toLowerCase().includes(searchBracket.toLowerCase())
+    )
+  })).filter(round => round.matches.length > 0);
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -160,18 +212,6 @@ const TournamentDetails = () => {
               className="data-[state=active]:border-b-2 data-[state=active]:border-gaming-primary data-[state=active]:text-foreground pb-3 px-4 rounded-none"
             >
               Standings
-            </TabsTrigger>
-            <TabsTrigger 
-              value="matches"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-gaming-primary data-[state=active]:text-foreground pb-3 px-4 rounded-none"
-            >
-              Matches
-            </TabsTrigger>
-            <TabsTrigger 
-              value="statistics"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-gaming-primary data-[state=active]:text-foreground pb-3 px-4 rounded-none"
-            >
-              Statistics
             </TabsTrigger>
             <TabsTrigger 
               value="bracket"
@@ -286,29 +326,53 @@ const TournamentDetails = () => {
             </TabsContent>
             
             <TabsContent value="standings">
+              <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <div className="flex gap-4 items-center w-full md:w-auto">
+                  <Select value={selectedRound} onValueChange={setSelectedRound}>
+                    <SelectTrigger className="w-[200px] bg-gaming-dark border-gaming-primary/30">
+                      <SelectValue placeholder="Select Round" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gaming-dark border-gaming-primary/30">
+                      {roundOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="relative flex-1 md:max-w-xs">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search players..."
+                      value={searchStandings}
+                      onChange={(e) => setSearchStandings(e.target.value)}
+                      className="pl-10 bg-gaming-dark border-gaming-primary/30"
+                    />
+                  </div>
+                </div>
+              </div>
+              
               <TournamentStandings
-                players={playersData}
+                players={filteredStandingsPlayers}
                 roundNumber={tournamentData.currentRound}
-              />
-            </TabsContent>
-            
-            <TabsContent value="matches">
-              <MatchesSchedule 
-                matches={matchesData}
-                roundNumber={tournamentData.currentRound}
-              />
-            </TabsContent>
-            
-            <TabsContent value="statistics">
-              <RoundStatistics 
-                roundNumber={tournamentData.currentRound}
-                bidData={bidStatisticsData}
-                positionData={positionData}
               />
             </TabsContent>
             
             <TabsContent value="bracket">
-              <TournamentBracket rounds={bracketData} />
+              <div className="mb-6">
+                <div className="relative max-w-xs">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search players..."
+                    value={searchBracket}
+                    onChange={(e) => setSearchBracket(e.target.value)}
+                    className="pl-10 bg-gaming-dark border-gaming-primary/30"
+                  />
+                </div>
+              </div>
+              
+              <TournamentBracket rounds={filteredBracketData} />
             </TabsContent>
           </div>
         </Tabs>
