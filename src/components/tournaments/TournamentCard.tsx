@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Users } from "lucide-react";
+import { Trophy, Users, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -108,7 +108,14 @@ const TournamentCard = ({
           
           <div className="text-right">
             <div className="mb-1 text-sm text-muted-foreground">Entry Fee</div>
-            <div className="text-lg font-bold">{entryFee}</div>
+            <Button 
+              size="sm"
+              variant="outline"
+              className="bg-gaming-primary/10 border-gaming-primary/30 hover:bg-gaming-primary/20 text-white"
+            >
+              <DollarSign className="h-4 w-4 mr-1" />
+              {entryFee.replace('$', '')}
+            </Button>
           </div>
         </div>
         
