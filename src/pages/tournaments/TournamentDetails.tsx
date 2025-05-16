@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import TournamentHero from "@/components/tournaments/TournamentHero";
 import TournamentStandings from "@/components/tournaments/TournamentStandings";
 import TournamentBracket from "@/components/tournaments/TournamentBracket";
+import TournamentWinnings from "@/components/tournaments/TournamentWinnings";
 import RegistrationForm from "@/components/tournaments/RegistrationForm";
-import { Search } from "lucide-react";
+import { Search, DollarSign } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,7 +19,7 @@ const tournamentData = {
   id: "tournament-1",
   title: "Bid Tac Toe Championship",
   description: "The biggest Bid Tac Toe tournament of the year! Compete against the best strategic bidders from around the world for the ultimate prize pool. Test your bidding skills, strategic thinking, and economic decision-making in this unique variant of the classic game.",
-  status: "ongoing" as const,
+  status: "upcoming" as const,
   participants: {
     current: 964,
     total: 1000,
@@ -26,6 +28,7 @@ const tournamentData = {
   totalRounds: 10,
   startDate: "May 15, 2025",
   prize: "$10,000",
+  entryFee: "$25",
 };
 
 // Mock players data by round
@@ -175,6 +178,32 @@ const bracketData = [
   },
 ];
 
+// Mock winnings data
+const winningsData = {
+  guaranteed: [
+    { rank: "#1", amount: "$3,000", note: "1st prize will increase when total spots increase" },
+    { rank: "#2", amount: "$1,500" },
+    { rank: "#3", amount: "$1,000" },
+    { rank: "#4", amount: "$500" },
+    { rank: "#5", amount: "$300" },
+    { rank: "#6", amount: "$200" },
+    { rank: "#7", amount: "$150" },
+    { rank: "#8-10", amount: "$100" },
+  ],
+  maximum: [
+    { rank: "#1", amount: "$5,000" },
+    { rank: "#2", amount: "$2,000" },
+    { rank: "#3", amount: "$1,000" },
+    { rank: "#4", amount: "$750" },
+    { rank: "#5", amount: "$500" },
+    { rank: "#6", amount: "$300" },
+    { rank: "#7", amount: "$200" },
+    { rank: "#8-10", amount: "$150" },
+  ],
+  totalGuaranteed: "$7,050",
+  totalMaximum: "$10,750",
+};
+
 const roundOptions = [
   { label: "All Participants", value: "all" },
   { label: "Winner", value: "winner" },
@@ -218,9 +247,37 @@ const TournamentDetails = () => {
   
   return (
     <div className="container mx-auto py-8 px-4">
-      <TournamentHero
-        {...tournamentData}
-      />
+      <div className="flex justify-between items-start">
+        <TournamentHero
+          {...tournamentData}
+        />
+        
+        <div className="hidden md:block ml-4">
+          <Button 
+            onClick={() => setIsJoinDialogOpen(true)}
+            className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2 px-6 py-6 text-lg"
+          >
+            <span>Join for</span>
+            <span className="flex items-center">
+              <DollarSign className="h-5 w-5" />
+              {tournamentData.entryFee.replace('$', '')}
+            </span>
+          </Button>
+        </div>
+      </div>
+      
+      <div className="md:hidden mt-4">
+        <Button 
+          onClick={() => setIsJoinDialogOpen(true)}
+          className="bg-gaming-primary hover:bg-gaming-secondary w-full flex items-center justify-center gap-2"
+        >
+          <span>Join for</span>
+          <span className="flex items-center">
+            <DollarSign className="h-4 w-4" />
+            {tournamentData.entryFee.replace('$', '')}
+          </span>
+        </Button>
+      </div>
       
       <div className="mt-8">
         <Tabs defaultValue="overview" className="w-full">
@@ -242,6 +299,12 @@ const TournamentDetails = () => {
               className="data-[state=active]:border-b-2 data-[state=active]:border-gaming-primary data-[state=active]:text-foreground pb-3 px-4 rounded-none"
             >
               Bracket
+            </TabsTrigger>
+            <TabsTrigger 
+              value="winnings"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-gaming-primary data-[state=active]:text-foreground pb-3 px-4 rounded-none"
+            >
+              Winnings
             </TabsTrigger>
           </TabsList>
           
@@ -390,6 +453,10 @@ const TournamentDetails = () => {
               </div>
               
               <TournamentBracket rounds={filteredBracketData} />
+            </TabsContent>
+            
+            <TabsContent value="winnings">
+              <TournamentWinnings {...winningsData} />
             </TabsContent>
           </div>
         </Tabs>

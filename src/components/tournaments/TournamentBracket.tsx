@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 interface MatchProps {
@@ -138,6 +140,11 @@ const TournamentBracket = ({ rounds }: TournamentBracketProps) => {
 };
 
 const BracketMatch = ({ match }: { match: MatchProps }) => {
+  const handleViewSession = () => {
+    console.log(`Viewing session for match ${match.id}: ${match.player1.name} vs ${match.player2.name}`);
+    // In a real app, this would navigate to a session replay page or open a modal
+  };
+
   return (
     <div 
       className="flex flex-col w-60 border border-gaming-primary/30 rounded-lg overflow-hidden backdrop-blur-sm bg-gaming-dark/50"
@@ -162,6 +169,17 @@ const BracketMatch = ({ match }: { match: MatchProps }) => {
         {match.player2.score !== undefined && (
           <span className="font-mono">{match.player2.score}</span>
         )}
+      </div>
+      <div className="p-2 bg-gaming-dark/70 border-t border-gaming-primary/30">
+        <Button 
+          onClick={handleViewSession}
+          variant="outline" 
+          size="sm"
+          className="w-full bg-gaming-primary/10 border-gaming-primary/30 hover:bg-gaming-primary/20 text-white flex items-center justify-center gap-2"
+        >
+          <Eye className="h-4 w-4" />
+          View Session
+        </Button>
       </div>
     </div>
   );

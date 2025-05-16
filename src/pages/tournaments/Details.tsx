@@ -6,7 +6,9 @@ const TournamentDetailsPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gaming-dark">
       <Navbar />
-      <TournamentDetails />
+      <div className="flex-1">
+        <TournamentDetails />
+      </div>
     </div>
   );
 };
