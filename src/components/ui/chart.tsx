@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -352,6 +353,93 @@ function getPayloadConfigFromPayload(
     ? config[configLabelKey]
     : config[key as keyof typeof config]
 }
+
+// Create and export BarChart component based on recharts
+export const BarChart = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div"> & {
+    data: any[]
+    index: string
+    categories: string[]
+    colors?: string[]
+    valueFormatter?: (value: number) => string
+    yAxisWidth?: number
+    showAnimation?: boolean
+  }
+>(
+  (
+    {
+      className,
+      data,
+      index,
+      categories,
+      colors = ["#0ea5e9"],
+      valueFormatter = (value) => String(value),
+      yAxisWidth = 56,
+      showAnimation = true,
+      ...props
+    },
+    ref
+  ) => {
+    const config = React.useMemo(() => {
+      return categories.reduce<ChartConfig>((acc, category, i) => {
+        acc[category] = {
+          color: colors[i % colors.length],
+        }
+        return acc
+      }, {})
+    }, [categories, colors])
+
+    return (
+      <ChartContainer
+        ref={ref}
+        className={cn("aspect-[4/3] w-full", className)}
+        config={config}
+        {...props}
+      >
+        <RechartsPrimitive.BarChart data={data}>
+          <RechartsPrimitive.XAxis
+            dataKey={index}
+            tickLine={false}
+            axisLine={false}
+            tick={{ transform: "translate(0, 6)" }}
+          />
+          <RechartsPrimitive.YAxis
+            width={yAxisWidth}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={valueFormatter}
+            tick={{ transform: "translate(-3, 0)" }}
+          />
+          <RechartsPrimitive.CartesianGrid
+            vertical={false}
+            strokeDasharray="4 4"
+          />
+          <RechartsPrimitive.Tooltip
+            content={(props) => (
+              <ChartTooltipContent
+                {...props}
+                formatter={(value, name) => [
+                  valueFormatter(Number(value)),
+                  name,
+                ]}
+              />
+            )}
+          />
+          {categories.map((category, i) => (
+            <RechartsPrimitive.Bar
+              key={category}
+              dataKey={category}
+              fill={colors[i % colors.length]}
+              isAnimationActive={showAnimation}
+            />
+          ))}
+        </RechartsPrimitive.BarChart>
+      </ChartContainer>
+    )
+  }
+)
+BarChart.displayName = "BarChart"
 
 export {
   ChartContainer,
