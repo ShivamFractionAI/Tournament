@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -342,6 +341,22 @@ const TournamentDetails = () => {
                           <li><span className="font-medium text-foreground">Bankruptcy:</span> If your opponent can't place a bid (has $0), you win</li>
                         </ul>
                       </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                      <Button 
+                        onClick={() => setIsJoinDialogOpen(true)}
+                        className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
+                        <span>Join for</span>
+                        <span className="flex items-center">
+                          <DollarSign className="h-4 w-4" />
+                          5.00
+                        </span>
+                      </Button>
+                      
+                      <Button variant="outline" className="border-gaming-primary/50 text-gaming-primary">
+                        Learn Game Rules
+                      </Button>
                     </div>
                   </div>
                   

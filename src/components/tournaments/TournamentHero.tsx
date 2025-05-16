@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Calendar, Trophy, Users, DollarSign } from "lucide-react";
+import { Calendar, Trophy, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface TournamentHeroProps {
@@ -101,32 +101,6 @@ const TournamentHero = ({
               <p className="font-semibold">{prize}</p>
             </div>
           </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4">
-          {status === "upcoming" && participants.current < participants.total && (
-            <>
-              <Button 
-                onClick={() => document.getElementById('join-tournament-dialog-trigger')?.click()} 
-                className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
-                <span>Join for</span>
-                <span className="flex items-center">
-                  <DollarSign className="h-4 w-4" />
-                  5.00
-                </span>
-              </Button>
-            </>
-          )}
-          
-          {status === "ongoing" && (
-            <Button className="bg-gaming-primary hover:bg-gaming-secondary">
-              View Live Matches
-            </Button>
-          )}
-          
-          <Button variant="outline" className="border-gaming-primary/50 text-gaming-primary">
-            Learn Game Rules
-          </Button>
         </div>
       </div>
     </div>
