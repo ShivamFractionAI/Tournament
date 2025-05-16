@@ -309,45 +309,6 @@ const TournamentDetails = () => {
                 </div>
                 
                 <div className="md:col-span-1">
-                  <div className="gaming-card border-gaming-primary/30 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h2 className="text-xl font-bold">Registration</h2>
-                        <p className="text-muted-foreground text-sm">Secure your spot in the tournament</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Entry Fee</span>
-                        <span className="font-semibold">$5.00</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Starting Balance</span>
-                        <span className="font-semibold">$100.00</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Spots Remaining</span>
-                        <span className="text-gaming-primary font-medium">{spotsLeft} of {tournamentData.participants.total}</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Tournament Starts</span>
-                        <span className="text-muted-foreground">{tournamentData.startDate}</span>
-                      </div>
-                      
-                      <Button 
-                        className="w-full bg-gaming-primary hover:bg-gaming-secondary mt-4"
-                        disabled={spotsLeft === 0}
-                        onClick={() => setIsJoinDialogOpen(true)}
-                      >
-                        {spotsLeft === 0 ? "Tournament Full" : `Join for $5.00`}
-                      </Button>
-                    </div>
-                  </div>
-                  
                   <div className="gaming-card p-6 mt-8">
                     <h2 className="text-xl font-bold mb-4">Tournament Schedule</h2>
                     <div className="space-y-4">
@@ -433,6 +394,13 @@ const TournamentDetails = () => {
           </div>
         </Tabs>
       </div>
+      
+      {/* Hidden button to trigger dialog */}
+      <button 
+        id="join-tournament-dialog-trigger"
+        className="hidden"
+        onClick={() => setIsJoinDialogOpen(true)}
+      ></button>
       
       {/* Join Tournament Dialog */}
       <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>

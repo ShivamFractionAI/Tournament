@@ -105,9 +105,13 @@ const TournamentHero = ({
         
         <div className="flex flex-col sm:flex-row gap-4">
           {status === "upcoming" && participants.current < participants.total && (
-            <Button className="bg-gaming-primary hover:bg-gaming-secondary">
-              Register Now
-            </Button>
+            <>
+              <Button 
+                onClick={() => document.getElementById('join-tournament-dialog-trigger')?.click()} 
+                className="bg-gaming-primary hover:bg-gaming-secondary">
+                Join for $5.00
+              </Button>
+            </>
           )}
           
           {status === "ongoing" && (
