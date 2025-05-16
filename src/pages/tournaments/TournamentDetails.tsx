@@ -249,33 +249,8 @@ const TournamentDetails = () => {
       <div className="flex justify-between items-start">
         <TournamentHero
           {...tournamentData}
+          onJoinClick={() => setIsJoinDialogOpen(true)}
         />
-        
-        <div className="hidden md:block ml-4">
-          <Button 
-            onClick={() => setIsJoinDialogOpen(true)}
-            className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2 px-6 py-6 text-lg"
-          >
-            <span>Join for</span>
-            <span className="flex items-center">
-              <DollarSign className="h-5 w-5" />
-              {tournamentData.entryFee.replace('$', '')}
-            </span>
-          </Button>
-        </div>
-      </div>
-      
-      <div className="md:hidden mt-4">
-        <Button 
-          onClick={() => setIsJoinDialogOpen(true)}
-          className="bg-gaming-primary hover:bg-gaming-secondary w-full flex items-center justify-center gap-2"
-        >
-          <span>Join for</span>
-          <span className="flex items-center">
-            <DollarSign className="h-4 w-4" />
-            {tournamentData.entryFee.replace('$', '')}
-          </span>
-        </Button>
       </div>
       
       <div className="mt-8">

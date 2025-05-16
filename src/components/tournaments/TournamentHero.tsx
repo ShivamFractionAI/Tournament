@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Calendar, Trophy, Users } from "lucide-react";
+import { Calendar, Trophy, Users, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface TournamentHeroProps {
@@ -16,6 +16,8 @@ interface TournamentHeroProps {
   startDate: string;
   prize: string;
   id: string;
+  entryFee: string;
+  onJoinClick?: () => void;
 }
 
 const TournamentHero = ({
@@ -27,7 +29,9 @@ const TournamentHero = ({
   totalRounds,
   startDate,
   prize,
-  id
+  id,
+  entryFee,
+  onJoinClick
 }: TournamentHeroProps) => {
   
   const statusText = {
@@ -43,21 +47,37 @@ const TournamentHero = ({
   };
   
   return (
-    <div className="gaming-card p-8 relative overflow-hidden">
+    <div className="gaming-card p-8 relative overflow-hidden w-full">
       <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
         <div className="absolute -right-20 -top-20 w-64 h-64 bg-gaming-primary rounded-full blur-3xl"></div>
         <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-gaming-secondary rounded-full blur-3xl"></div>
       </div>
       
       <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-4">
-          <span className={`text-sm font-medium px-3 py-1 rounded-full ${statusColor[status]}`}>
-            {statusText[status]}
-          </span>
-          {status === "ongoing" && (
-            <span className="text-sm font-medium px-3 py-1 rounded-full bg-gaming-dark">
-              Round {currentRound} of {totalRounds}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${statusColor[status]}`}>
+              {statusText[status]}
             </span>
+            {status === "ongoing" && (
+              <span className="text-sm font-medium px-3 py-1 rounded-full bg-gaming-dark">
+                Round {currentRound} of {totalRounds}
+              </span>
+            )}
+          </div>
+          
+          {/* Right-aligned button */}
+          {status === "upcoming" && onJoinClick && (
+            <Button 
+              onClick={onJoinClick}
+              className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2 px-6 py-6 text-lg ml-auto"
+            >
+              <span>Join for</span>
+              <span className="flex items-center">
+                <DollarSign className="h-5 w-5" />
+                {entryFee.replace('$', '')}
+              </span>
+            </Button>
           )}
         </div>
         
