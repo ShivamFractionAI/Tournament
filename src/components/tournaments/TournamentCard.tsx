@@ -1,9 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Trophy, Users, DollarSign, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Trophy, Users, Clock, Award, Percent } from "lucide-react";
 
 interface TournamentCardProps {
   id: string;
@@ -47,9 +45,6 @@ const TournamentCard = ({
     completed: "text-gaming-accent1",
   };
   
-  const progressValue = (participants.current / participants.total) * 100;
-  const spotsLeft = participants.total - participants.current;
-  
   return (
     <div className="gaming-card overflow-hidden">
       <div className="bg-gaming-primary/10 px-4 py-2 flex items-center justify-between">
@@ -60,9 +55,9 @@ const TournamentCard = ({
         </span>
       </div>
       
-      <div className="p-4">
+      <div className="p-3">
         {/* Prize and Entry Fee */}
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center mb-2">
           <div>
             <div className="text-xs text-muted-foreground">Guaranteed Prize</div>
             <div className="text-xl font-bold">{prize.guaranteed}</div>
@@ -73,57 +68,43 @@ const TournamentCard = ({
             variant="outline"
             className="bg-gaming-primary/10 border-gaming-primary/30 hover:bg-gaming-primary/20 text-white h-8"
           >
-            <DollarSign className="h-3.5 w-3.5 mr-1" />
-            {entryFee.replace('$', '')}
+            ${entryFee.replace('$', '')}
           </Button>
         </div>
         
-        {/* Participants Progress Bar */}
-        <div className="bg-gaming-primary/5 rounded px-2 py-1.5 mb-3">
-          <div className="flex justify-between items-center mb-1 text-xs">
-            <span className="flex items-center">
-              <Users className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-              {participants.current}
-            </span>
-            <span>{spotsLeft} spots left</span>
-          </div>
-          <Progress value={progressValue} className="h-1.5 bg-muted" />
+        {/* Agents Registered */}
+        <div className="mb-3 text-xs flex items-center">
+          <Users className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+          <span>{participants.current} Agents Registered</span>
         </div>
         
-        {/* Key Tournament Info */}
-        <div className="flex justify-between items-center mb-3 text-sm">
-          <div className="flex items-center">
-            <Trophy className="h-3.5 w-3.5 mr-1 text-gaming-accent1" />
-            <span>{firstPrize}</span>
-          </div>
-          <div className="text-xs px-2 py-1 bg-gaming-primary/10 rounded">
-            Top {winnersPercentage.replace('Top ', '')}
-          </div>
-          <div className="text-xs">
-            Max {maxEntries}
-          </div>
-        </div>
-        
-        {/* Call to action */}
-        <div className="flex items-center justify-between">
-          {status !== "completed" && (
-            <div className="text-xs">
-              <span>{status === "upcoming" 
-                ? status === "ongoing" 
-                ? `Round ${currentRound}/${totalRounds}`
-                : ""
-                : ""}</span>
+        {/* Key Tournament Info and CTA in one line */}
+        <div className="flex justify-between items-center text-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center">
+              <Trophy className="h-3.5 w-3.5 mr-1 text-gaming-accent1" />
+              <span>{firstPrize}</span>
             </div>
-          )}
+            
+            <div className="flex items-center">
+              <Percent className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+              <span>{winnersPercentage.replace('Top ', '')}</span>
+            </div>
+            
+            <div className="flex items-center">
+              <Award className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+              <span>{maxEntries}</span>
+            </div>
+          </div>
           
-          <Link to={`/tournaments/${id}`} className="ml-auto">
+          <Link to={`/tournaments/${id}`}>
             <Button 
               size="sm"
               className="bg-gaming-primary hover:bg-gaming-secondary h-8"
               disabled={status === "completed"}
             >
               {status === "upcoming" 
-                ? "Join Now"
+                ? "Join"
                 : status === "ongoing"
                 ? "View"
                 : "Results"}

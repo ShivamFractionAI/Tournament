@@ -7,11 +7,12 @@ import TournamentHero from "@/components/tournaments/TournamentHero";
 import TournamentStandings from "@/components/tournaments/TournamentStandings";
 import TournamentBracket from "@/components/tournaments/TournamentBracket";
 import TournamentWinnings from "@/components/tournaments/TournamentWinnings";
-import RegistrationForm from "@/components/tournaments/RegistrationForm";
-import { Search, DollarSign } from "lucide-react";
+import { Search, DollarSign, Users, Plus, Pencil, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Mock tournament data
 const tournamentData = {
@@ -203,6 +204,26 @@ const winningsData = {
   totalMaximum: "$10,750",
 };
 
+// Mock agents data
+const myAgentsData = [
+  {
+    id: "agent-1",
+    name: "Alpha Bidder",
+    prompt: "Aggressive bidding with early game dominance",
+    status: "active",
+    wins: 5,
+    losses: 2,
+  },
+  {
+    id: "agent-2",
+    name: "EconMaster",
+    prompt: "Conservative bidding, focus on economic victory",
+    status: "active",
+    wins: 3,
+    losses: 1,
+  },
+];
+
 const roundOptions = [
   { label: "All Participants", value: "all" },
   { label: "Winner", value: "winner" },
@@ -221,8 +242,12 @@ const TournamentDetails = () => {
   const [searchBracket, setSearchBracket] = useState("");
   const [selectedRound, setSelectedRound] = useState("all");
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
+  const [isAgentDialogOpen, setIsAgentDialogOpen] = useState(false);
   const [agentName, setAgentName] = useState("");
   const [prompt, setPrompt] = useState("");
+  const [editingAgent, setEditingAgent] = useState<string | null>(null);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
   
   const filteredStandingsPlayers = roundsPlayersData[selectedRound as keyof typeof roundsPlayersData]
     .filter(player => player.name.toLowerCase().includes(searchStandings.toLowerCase()));
@@ -242,6 +267,29 @@ const TournamentDetails = () => {
     // Reset form
     setAgentName("");
     setPrompt("");
+  };
+  
+  const handleAddOrEditAgent = () => {
+    // In a real app, this would submit the form data to a backend
+    console.log("Adding/Editing agent:", { agentName, prompt, editingAgent });
+    setIsAgentDialogOpen(false);
+    // Reset form
+    setAgentName("");
+    setPrompt("");
+    setEditingAgent(null);
+  };
+  
+  const openAgentDialog = (agent = null) => {
+    if (agent) {
+      setAgentName(agent.name);
+      setPrompt(agent.prompt);
+      setEditingAgent(agent.id);
+    } else {
+      setAgentName("");
+      setPrompt("");
+      setEditingAgent(null);
+    }
+    setIsAgentDialogOpen(true);
   };
   
   return (
@@ -280,89 +328,124 @@ const TournamentDetails = () => {
             >
               Winnings
             </TabsTrigger>
+            <TabsTrigger 
+              value="myagents"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-gaming-primary data-[state=active]:text-foreground pb-3 px-4 rounded-none"
+            >
+              My Agents
+            </TabsTrigger>
           </TabsList>
           
           <div className="mt-8">
             <TabsContent value="overview">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
-                  <div className="gaming-card p-6 mb-8">
-                    <h2 className="text-xl font-bold mb-4">Tournament Rules</h2>
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Game Setup</h3>
-                        <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                          <li>Each player starts with $100</li>
-                          <li>The board is a standard 3×3 Tic-Tac-Toe grid</li>
-                          <li>One player is assigned X, the other O</li>
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Gameplay Rules</h3>
-                        <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                          <li>Before each move, both players place a secret bid</li>
-                          <li>The higher bidder gets to place their mark on the board</li>
-                          <li>Both players lose their bid amount regardless of who wins the bid</li>
-                          <li>If bids are tied, winner is decided by coin toss</li>
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Winning Conditions</h3>
-                        <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                          <li><span className="font-medium text-foreground">Standard Win:</span> Get three of your marks in a row (horizontally, vertically, or diagonally)</li>
-                          <li><span className="font-medium text-foreground">Economic Win:</span> Have more money than your opponent when the board fills</li>
-                          <li><span className="font-medium text-foreground">Bankruptcy:</span> If your opponent can't place a bid (has $0), you win</li>
-                        </ul>
-                      </div>
+                  {/* Tournament Rules - Collapsible */}
+                  <Collapsible
+                    open={rulesOpen}
+                    onOpenChange={setRulesOpen}
+                    className="gaming-card mb-6"
+                  >
+                    <div className="p-6 flex justify-between items-center">
+                      <h2 className="text-xl font-bold">Tournament Rules</h2>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="border-gaming-primary/30">
+                          {rulesOpen ? "Hide Rules" : "Show Rules"}
+                        </Button>
+                      </CollapsibleTrigger>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                      <Button 
-                        onClick={() => setIsJoinDialogOpen(true)}
-                        className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
-                        <span>Join for</span>
-                        <span className="flex items-center">
-                          <DollarSign className="h-4 w-4" />
-                          5.00
-                        </span>
-                      </Button>
+                    <CollapsibleContent className="px-6 pb-6">
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-medium mb-2">Game Setup</h3>
+                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                            <li>Each player starts with $100</li>
+                            <li>The board is a standard 3×3 Tic-Tac-Toe grid</li>
+                            <li>One player is assigned X, the other O</li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-lg font-medium mb-2">Gameplay Rules</h3>
+                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                            <li>Before each move, both players place a secret bid</li>
+                            <li>The higher bidder gets to place their mark on the board</li>
+                            <li>Both players lose their bid amount regardless of who wins the bid</li>
+                            <li>If bids are tied, winner is decided by coin toss</li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-lg font-medium mb-2">Winning Conditions</h3>
+                          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                            <li><span className="font-medium text-foreground">Standard Win:</span> Get three of your marks in a row (horizontally, vertically, or diagonally)</li>
+                            <li><span className="font-medium text-foreground">Economic Win:</span> Have more money than your opponent when the board fills</li>
+                            <li><span className="font-medium text-foreground">Bankruptcy:</span> If your opponent can't place a bid (has $0), you win</li>
+                          </ul>
+                        </div>
+                      </div>
                       
-                      <Button variant="outline" className="border-gaming-primary/50 text-gaming-primary">
-                        Learn Game Rules
-                      </Button>
-                    </div>
-                  </div>
+                      <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                        <Button 
+                          onClick={() => setIsJoinDialogOpen(true)}
+                          className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
+                          <span>Join for</span>
+                          <span className="flex items-center">
+                            <DollarSign className="h-4 w-4" />
+                            5.00
+                          </span>
+                        </Button>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                   
-                  <div className="gaming-card p-6">
-                    <h2 className="text-xl font-bold mb-4">Strategy Tips</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-gaming-primary/10 p-4 rounded-lg">
-                        <h3 className="font-medium mb-2">Economy Management</h3>
-                        <p className="text-sm text-muted-foreground">Balance your bids - don't spend too much too early. Watch your opponent's money and adjust your strategy accordingly.</p>
-                      </div>
-                      
-                      <div className="bg-gaming-primary/10 p-4 rounded-lg">
-                        <h3 className="font-medium mb-2">Position Value</h3>
-                        <p className="text-sm text-muted-foreground">Corner and center positions provide most strategic value. Sometimes it's worth losing a bid to preserve funds for later rounds.</p>
-                      </div>
-                      
-                      <div className="bg-gaming-primary/10 p-4 rounded-lg">
-                        <h3 className="font-medium mb-2">Bluffing</h3>
-                        <p className="text-sm text-muted-foreground">Make your opponent overspend on less valuable positions by placing higher bids initially, then conserve for crucial moves.</p>
-                      </div>
-                      
-                      <div className="bg-gaming-primary/10 p-4 rounded-lg">
-                        <h3 className="font-medium mb-2">Endgame Focus</h3>
-                        <p className="text-sm text-muted-foreground">In the final moves, consider your remaining balance. Sometimes an economic victory is easier than a standard win.</p>
-                      </div>
+                  {/* Strategy Tips - Collapsible */}
+                  <Collapsible
+                    open={tipsOpen}
+                    onOpenChange={setTipsOpen}
+                    className="gaming-card mb-6"
+                  >
+                    <div className="p-6 flex justify-between items-center">
+                      <h2 className="text-xl font-bold">Strategy Tips</h2>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="border-gaming-primary/30">
+                          {tipsOpen ? "Hide Tips" : "Show Tips"}
+                        </Button>
+                      </CollapsibleTrigger>
                     </div>
-                  </div>
+                    
+                    <CollapsibleContent className="px-6 pb-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-gaming-primary/10 p-4 rounded-lg">
+                          <h3 className="font-medium mb-2">Economy Management</h3>
+                          <p className="text-sm text-muted-foreground">Balance your bids - don't spend too much too early. Watch your opponent's money and adjust your strategy accordingly.</p>
+                        </div>
+                        
+                        <div className="bg-gaming-primary/10 p-4 rounded-lg">
+                          <h3 className="font-medium mb-2">Position Value</h3>
+                          <p className="text-sm text-muted-foreground">Corner and center positions provide most strategic value. Sometimes it's worth losing a bid to preserve funds for later rounds.</p>
+                        </div>
+                        
+                        <div className="bg-gaming-primary/10 p-4 rounded-lg">
+                          <h3 className="font-medium mb-2">Bluffing</h3>
+                          <p className="text-sm text-muted-foreground">Make your opponent overspend on less valuable positions by placing higher bids initially, then conserve for crucial moves.</p>
+                        </div>
+                        
+                        <div className="bg-gaming-primary/10 p-4 rounded-lg">
+                          <h3 className="font-medium mb-2">Endgame Focus</h3>
+                          <p className="text-sm text-muted-foreground">In the final moves, consider your remaining balance. Sometimes an economic victory is easier than a standard win.</p>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                  
+                  {/* Tournament Winnings for Overview */}
+                  <TournamentWinnings {...winningsData} />
                 </div>
                 
                 <div className="md:col-span-1">
-                  <div className="gaming-card p-6 mt-8">
+                  <div className="gaming-card p-6">
                     <h2 className="text-xl font-bold mb-4">Tournament Schedule</h2>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center border-b border-gaming-primary/20 pb-2">
@@ -396,33 +479,6 @@ const TournamentDetails = () => {
             </TabsContent>
             
             <TabsContent value="standings">
-              <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                <div className="flex gap-4 items-center w-full md:w-auto">
-                  <Select value={selectedRound} onValueChange={setSelectedRound}>
-                    <SelectTrigger className="w-[200px] bg-gaming-dark border-gaming-primary/30">
-                      <SelectValue placeholder="Select Round" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gaming-dark border-gaming-primary/30">
-                      {roundOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  <div className="relative flex-1 md:max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Search players..."
-                      value={searchStandings}
-                      onChange={(e) => setSearchStandings(e.target.value)}
-                      className="pl-10 bg-gaming-dark border-gaming-primary/30"
-                    />
-                  </div>
-                </div>
-              </div>
-              
               <TournamentStandings
                 players={filteredStandingsPlayers}
                 roundNumber={tournamentData.currentRound}
@@ -456,31 +512,17 @@ const TournamentDetails = () => {
             </TabsContent>
             
             <TabsContent value="bracket">
-              <div className="mb-6">
-                <div className="relative max-w-xs">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search players..."
-                    value={searchBracket}
-                    onChange={(e) => setSearchBracket(e.target.value)}
-                    className="pl-10 bg-gaming-dark border-gaming-primary/30"
-                  />
-                </div>
-              </div>
-              
               <TournamentBracket 
                 rounds={filteredBracketData} 
                 searchControls={
-                  <div className="ml-auto">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                      <Input
-                        placeholder="Search players..."
-                        value={searchBracket}
-                        onChange={(e) => setSearchBracket(e.target.value)}
-                        className="pl-10 bg-gaming-dark border-gaming-primary/30"
-                      />
-                    </div>
+                  <div className="relative ml-auto">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search players..."
+                      value={searchBracket}
+                      onChange={(e) => setSearchBracket(e.target.value)}
+                      className="pl-10 bg-gaming-dark border-gaming-primary/30"
+                    />
                   </div>
                 }
               />
@@ -489,16 +531,77 @@ const TournamentDetails = () => {
             <TabsContent value="winnings">
               <TournamentWinnings {...winningsData} />
             </TabsContent>
+            
+            <TabsContent value="myagents">
+              <Card className="gaming-card overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-gaming-primary" />
+                    My Agents
+                  </CardTitle>
+                  <Button 
+                    onClick={() => openAgentDialog()}
+                    className="bg-gaming-primary hover:bg-gaming-secondary"
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add Agent
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {myAgentsData.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground mb-4">You haven't added any agents to this tournament yet</p>
+                      <Button 
+                        onClick={() => openAgentDialog()}
+                        className="bg-gaming-primary hover:bg-gaming-secondary"
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> Add Your First Agent
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {myAgentsData.map((agent) => (
+                        <div key={agent.id} className="bg-gaming-primary/10 p-4 rounded-lg flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium">{agent.name}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">{agent.prompt}</p>
+                            <div className="mt-2 text-sm">
+                              <span className="bg-gaming-primary/20 px-2 py-0.5 rounded mr-2">
+                                {agent.wins} wins
+                              </span>
+                              <span className="bg-gaming-primary/20 px-2 py-0.5 rounded">
+                                {agent.losses} losses
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="border-gaming-primary/30 h-8 w-8 p-0"
+                              onClick={() => openAgentDialog(agent)}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              <span className="sr-only">Edit agent</span>
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="border-destructive/30 text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span className="sr-only">Delete agent</span>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </div>
         </Tabs>
       </div>
-      
-      {/* Hidden button to trigger dialog */}
-      <button 
-        id="join-tournament-dialog-trigger"
-        className="hidden"
-        onClick={() => setIsJoinDialogOpen(true)}
-      ></button>
       
       {/* Join Tournament Dialog */}
       <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
@@ -539,6 +642,53 @@ const TournamentDetails = () => {
                 onClick={handleJoinTournament}
               >
                 Join Tournament
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add/Edit Agent Dialog */}
+      <Dialog open={isAgentDialogOpen} onOpenChange={setIsAgentDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-gaming-dark border-gaming-primary/30">
+          <DialogHeader>
+            <DialogTitle>{editingAgent ? "Edit Agent" : "Add Agent"}</DialogTitle>
+            <DialogDescription>
+              {editingAgent 
+                ? "Update your agent's details" 
+                : "Create a new agent to compete in this tournament"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="agentName">Agent Name</Label>
+              <Input 
+                id="agentName" 
+                value={agentName}
+                onChange={(e) => setAgentName(e.target.value)}
+                placeholder="Enter agent name"
+                className="bg-gaming-dark/60 border-gaming-primary/30"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="prompt">Strategy Prompt</Label>
+              <Input 
+                id="prompt" 
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Enter strategy prompt"
+                className="bg-gaming-dark/60 border-gaming-primary/30"
+              />
+            </div>
+            
+            <div className="pt-4">
+              <Button 
+                className="w-full bg-gaming-primary hover:bg-gaming-secondary"
+                onClick={handleAddOrEditAgent}
+              >
+                {editingAgent ? "Update Agent" : "Add Agent"}
               </Button>
             </div>
           </div>
