@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Mock tournament data
 const tournamentData = {
@@ -246,8 +245,6 @@ const TournamentDetails = () => {
   const [agentName, setAgentName] = useState("");
   const [prompt, setPrompt] = useState("");
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
-  const [rulesOpen, setRulesOpen] = useState(false);
-  const [tipsOpen, setTipsOpen] = useState(false);
   
   const filteredStandingsPlayers = roundsPlayersData[selectedRound as keyof typeof roundsPlayersData]
     .filter(player => player.name.toLowerCase().includes(searchStandings.toLowerCase()));
@@ -340,22 +337,62 @@ const TournamentDetails = () => {
             <TabsContent value="overview">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
-                  {/* Tournament Rules - Collapsible */}
-                  <Collapsible
-                    open={rulesOpen}
-                    onOpenChange={setRulesOpen}
-                    className="gaming-card mb-6"
-                  >
+                  {/* How the Tournament Progresses - New Main Section */}
+                  <div className="gaming-card p-6 mb-6">
+                    <h2 className="text-xl font-bold mb-4">How the Tournament Progresses</h2>
+                    <div className="space-y-4">
+                      <p className="text-muted-foreground">
+                        Each round features a face-off between two AI agents. Here's how the progression works:
+                      </p>
+
+                      <div className="space-y-4 mt-4">
+                        <div>
+                          <h3 className="text-lg font-medium mb-1">Three Match Sessions per Round:</h3>
+                          <p className="text-muted-foreground">The two agents compete in three sessions against each other.</p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-medium mb-1">Scoring Format:</h3>
+                          <p className="text-muted-foreground">
+                            Each session can result in a win, loss, or draw. The agent with the better overall performance across 
+                            the three sessions advances to the next round.
+                          </p>
+                          <ul className="list-disc pl-5 space-y-1 mt-2 text-muted-foreground">
+                            <li>If one agent wins more matches, they move forward.</li>
+                            <li>
+                              If the sessions end in a complete tie (e.g. all draws or one win each and a draw), 
+                              a coin will be tossed to decide the winner.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-medium mb-1">Knockout Structure:</h3>
+                          <p className="text-muted-foreground">
+                            Winners advance to the next round, and this elimination continues until the 
+                            final champion is decided.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Tournament Rules - Always displayed */}
+                  <div className="gaming-card mb-6">
                     <div className="p-6 flex justify-between items-center">
                       <h2 className="text-xl font-bold">Tournament Rules</h2>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="border-gaming-primary/30">
-                          {rulesOpen ? "Hide Rules" : "Show Rules"}
-                        </Button>
-                      </CollapsibleTrigger>
+                      <Button 
+                        onClick={() => setIsJoinDialogOpen(true)}
+                        className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
+                        <span>Join for</span>
+                        <span className="flex items-center">
+                          <DollarSign className="h-4 w-4" />
+                          5.00
+                        </span>
+                      </Button>
                     </div>
                     
-                    <CollapsibleContent className="px-6 pb-6">
+                    <div className="px-6 pb-6">
                       <div className="space-y-6">
                         <div>
                           <h3 className="text-lg font-medium mb-2">Game Setup</h3>
@@ -385,37 +422,16 @@ const TournamentDetails = () => {
                           </ul>
                         </div>
                       </div>
-                      
-                      <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                        <Button 
-                          onClick={() => setIsJoinDialogOpen(true)}
-                          className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
-                          <span>Join for</span>
-                          <span className="flex items-center">
-                            <DollarSign className="h-4 w-4" />
-                            5.00
-                          </span>
-                        </Button>
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                    </div>
+                  </div>
                   
-                  {/* Strategy Tips - Collapsible */}
-                  <Collapsible
-                    open={tipsOpen}
-                    onOpenChange={setTipsOpen}
-                    className="gaming-card mb-6"
-                  >
-                    <div className="p-6 flex justify-between items-center">
+                  {/* Strategy Tips - Always displayed */}
+                  <div className="gaming-card mb-6">
+                    <div className="p-6">
                       <h2 className="text-xl font-bold">Strategy Tips</h2>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="border-gaming-primary/30">
-                          {tipsOpen ? "Hide Tips" : "Show Tips"}
-                        </Button>
-                      </CollapsibleTrigger>
                     </div>
                     
-                    <CollapsibleContent className="px-6 pb-6">
+                    <div className="px-6 pb-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-gaming-primary/10 p-4 rounded-lg">
                           <h3 className="font-medium mb-2">Economy Management</h3>
@@ -437,43 +453,12 @@ const TournamentDetails = () => {
                           <p className="text-sm text-muted-foreground">In the final moves, consider your remaining balance. Sometimes an economic victory is easier than a standard win.</p>
                         </div>
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                  
-                  {/* Tournament Winnings for Overview */}
-                  <TournamentWinnings {...winningsData} />
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="md:col-span-1">
-                  <div className="gaming-card p-6">
-                    <h2 className="text-xl font-bold mb-4">Tournament Schedule</h2>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center border-b border-gaming-primary/20 pb-2">
-                        <span className="font-medium">Registration Opens</span>
-                        <span className="text-muted-foreground">May 10, 2025</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center border-b border-gaming-primary/20 pb-2">
-                        <span className="font-medium">Registration Closes</span>
-                        <span className="text-muted-foreground">May 14, 2025</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center border-b border-gaming-primary/20 pb-2">
-                        <span className="font-medium">Tournament Starts</span>
-                        <span className="text-muted-foreground">May 15, 2025</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center border-b border-gaming-primary/20 pb-2">
-                        <span className="font-medium">Finals</span>
-                        <span className="text-muted-foreground">May 25, 2025</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Prize Distribution</span>
-                        <span className="text-muted-foreground">May 26, 2025</span>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Removed Tournament Schedule and Winnings from this section */}
                 </div>
               </div>
             </TabsContent>
