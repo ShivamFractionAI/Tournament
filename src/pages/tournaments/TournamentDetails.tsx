@@ -7,11 +7,12 @@ import TournamentHero from "@/components/tournaments/TournamentHero";
 import TournamentStandings from "@/components/tournaments/TournamentStandings";
 import TournamentBracket from "@/components/tournaments/TournamentBracket";
 import TournamentWinnings from "@/components/tournaments/TournamentWinnings";
-import { Search, DollarSign, Users, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, DollarSign, Users, Plus, Pencil, Trash2, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AgentSelectionDialog from "@/components/tournaments/AgentSelectionDialog";
 
 // Mock tournament data
 const tournamentData = {
@@ -207,19 +208,53 @@ const winningsData = {
 const myAgentsData = [
   {
     id: "agent-1",
-    name: "Alpha Bidder",
+    name: "Bid Tac Pro",
     prompt: "Aggressive bidding with early game dominance",
     status: "active",
     wins: 5,
     losses: 2,
+    rank: "SILVER II",
+    avatar: "🎮",
   },
   {
     id: "agent-2",
-    name: "EconMaster",
+    name: "DepressedMarlin6113",
     prompt: "Conservative bidding, focus on economic victory",
     status: "active",
     wins: 3,
     losses: 1,
+    rank: "SILVER II",
+    avatar: "💎",
+  },
+  {
+    id: "agent-3",
+    name: "DutchCobra2170",
+    prompt: "Balanced strategy with adaptive bidding",
+    status: "active",
+    wins: 4,
+    losses: 2,
+    rank: "SILVER II",
+    avatar: "🎯",
+  },
+  {
+    id: "agent-4",
+    name: "SpaceForce4200",
+    prompt: "Aggressive corner-taking strategy",
+    status: "active",
+    wins: 6,
+    losses: 3,
+    rank: "SILVER II",
+    avatar: "🚀",
+  },
+  {
+    id: "agent-5",
+    name: "CryptoKnight",
+    prompt: "Economic focus with strategic late-game",
+    status: "active",
+    wins: 2,
+    losses: 1,
+    rank: "SILVER II",
+    avatar: "🔒",
   },
 ];
 
@@ -235,12 +270,11 @@ const roundOptions = [
 
 const TournamentDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const spotsLeft = tournamentData.participants.total - tournamentData.participants.current;
   
   const [searchStandings, setSearchStandings] = useState("");
   const [searchBracket, setSearchBracket] = useState("");
   const [selectedRound, setSelectedRound] = useState("all");
-  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
+  const [isAgentSelectionDialogOpen, setIsAgentSelectionDialogOpen] = useState(false);
   const [isAgentDialogOpen, setIsAgentDialogOpen] = useState(false);
   const [agentName, setAgentName] = useState("");
   const [prompt, setPrompt] = useState("");
@@ -257,13 +291,10 @@ const TournamentDetails = () => {
     )
   })).filter(round => round.matches.length > 0);
   
-  const handleJoinTournament = () => {
-    // In a real app, this would submit the form data to a backend
-    console.log("Joining tournament with:", { agentName, prompt });
-    setIsJoinDialogOpen(false);
-    // Reset form
-    setAgentName("");
-    setPrompt("");
+  const handleJoinTournament = (selectedAgentIds: string[]) => {
+    // In a real app, this would submit the selected agents to a backend
+    console.log("Joining tournament with agents:", selectedAgentIds);
+    setIsAgentSelectionDialogOpen(false);
   };
   
   const handleAddOrEditAgent = () => {
@@ -294,7 +325,7 @@ const TournamentDetails = () => {
       <div className="flex justify-between items-start">
         <TournamentHero
           {...tournamentData}
-          onJoinClick={() => setIsJoinDialogOpen(true)}
+          onJoinClick={() => setIsAgentSelectionDialogOpen(true)}
         />
       </div>
       
@@ -382,7 +413,7 @@ const TournamentDetails = () => {
                     <div className="p-6 flex justify-between items-center">
                       <h2 className="text-xl font-bold">Tournament Rules</h2>
                       <Button 
-                        onClick={() => setIsJoinDialogOpen(true)}
+                        onClick={() => setIsAgentSelectionDialogOpen(true)}
                         className="bg-gaming-primary hover:bg-gaming-secondary flex items-center gap-2">
                         <span>Join for</span>
                         <span className="flex items-center">
@@ -588,50 +619,15 @@ const TournamentDetails = () => {
         </Tabs>
       </div>
       
-      {/* Join Tournament Dialog */}
-      <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-gaming-dark border-gaming-primary/30">
-          <DialogHeader>
-            <DialogTitle>Join Tournament</DialogTitle>
-            <DialogDescription>
-              Enter your agent details to participate in the {tournamentData.title}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="agentName">Agent Name</Label>
-              <Input 
-                id="agentName" 
-                value={agentName}
-                onChange={(e) => setAgentName(e.target.value)}
-                placeholder="Enter your agent name"
-                className="bg-gaming-dark/60 border-gaming-primary/30"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt for Tournament</Label>
-              <Input 
-                id="prompt" 
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter your strategy prompt"
-                className="bg-gaming-dark/60 border-gaming-primary/30"
-              />
-            </div>
-            
-            <div className="pt-4">
-              <Button 
-                className="w-full bg-gaming-primary hover:bg-gaming-secondary"
-                onClick={handleJoinTournament}
-              >
-                Join Tournament
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Agent Selection Dialog */}
+      <AgentSelectionDialog
+        open={isAgentSelectionDialogOpen}
+        onOpenChange={setIsAgentSelectionDialogOpen}
+        agents={myAgentsData}
+        entryFee={parseInt(tournamentData.entryFee.replace('$', ''))}
+        onJoin={handleJoinTournament}
+        onCreateNew={openAgentDialog}
+      />
       
       {/* Add/Edit Agent Dialog */}
       <Dialog open={isAgentDialogOpen} onOpenChange={setIsAgentDialogOpen}>
