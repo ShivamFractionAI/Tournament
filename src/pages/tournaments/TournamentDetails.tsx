@@ -7,7 +7,7 @@ import TournamentHero from "@/components/tournaments/TournamentHero";
 import TournamentStandings from "@/components/tournaments/TournamentStandings";
 import TournamentBracket from "@/components/tournaments/TournamentBracket";
 import TournamentWinnings from "@/components/tournaments/TournamentWinnings";
-import { Search, DollarSign, Users, Plus, Pencil, Trash2, Check } from "lucide-react";
+import { Search, DollarSign, Users, Plus, Pencil, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ const tournamentData = {
   startDate: "May 15, 2025",
   prize: "$10,000",
   entryFee: "$25",
+  remainingTime: "5h 35m 30s",
 };
 
 // Mock players data by round

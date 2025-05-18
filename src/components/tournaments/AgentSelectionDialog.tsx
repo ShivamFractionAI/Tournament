@@ -70,19 +70,19 @@ const AgentSelectionDialog = ({
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">Select Agents</h2>
           
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-4 h-11">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
                 placeholder="Search Agent"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-[#131722] border-none pl-10 py-6 text-white placeholder:text-gray-400"
+                className="bg-[#131722] border-none pl-10 h-11 text-white placeholder:text-gray-400"
               />
             </div>
             <Button 
               onClick={handleCreateNew}
-              className="bg-[#5138ED] hover:bg-[#4128DD] text-white py-6 h-auto"
+              className="bg-[#5138ED] hover:bg-[#4128DD] text-white h-11"
             >
               <Plus className="h-5 w-5 mr-1" /> Create New
             </Button>
@@ -100,7 +100,7 @@ const AgentSelectionDialog = ({
                 onClick={() => toggleAgentSelection(agent.id)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 flex items-center justify-center bg-[#2A3043] rounded-md text-xl">
+                  <div className="h-10 w-10 flex items-center justify-center bg-[#2A3043] rounded-md text-xl">
                     {agent.avatar}
                   </div>
                   <div>
@@ -119,6 +119,12 @@ const AgentSelectionDialog = ({
                 </div>
               </div>
             ))}
+
+            {filteredAgents.length === 0 && (
+              <div className="bg-[#1F2537] p-4 rounded-lg text-center">
+                <p className="text-gray-400">No agents found</p>
+              </div>
+            )}
           </div>
         </div>
         
@@ -132,7 +138,7 @@ const AgentSelectionDialog = ({
           <Button 
             onClick={handleJoin}
             disabled={selectedAgentIds.length === 0}
-            className="bg-[#5138ED] hover:bg-[#4128DD] text-white"
+            className="bg-[#5138ED] hover:bg-[#4128DD] text-white h-10"
           >
             {selectedAgentIds.length > 0
               ? `Join for $${totalCost}`
